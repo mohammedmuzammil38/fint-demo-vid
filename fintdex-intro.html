@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fintdex – Secure Escrow for Global Trade</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #030306;
+      --bg-mesh: #06060c;
+      --surface: rgba(12, 14, 28, 0.7);
+      --surface-solid: #0c0e1c;
+      --surface-elevated: rgba(18, 22, 42, 0.8);
+      --border: rgba(99, 179, 237, 0.12);
+      --border-glow: rgba(99, 179, 237, 0.35);
+      --text: #f0f2f8;
+      --text-muted: #8b92b0;
+      --accent: #63b3ed;
+      --accent-purple: #a78bfa;
+      --accent-cyan: #22d3ee;
+      --accent-green: #34d399;
+      --gradient-start: #6366f1;
+      --gradient-mid: #8b5cf6;
+      --gradient-end: #06b6d4;
+      --glow-cyan: 0 0 40px rgba(34, 211, 238, 0.15);
+      --glow-purple: 0 0 40px rgba(167, 139, 250, 0.12);
+      --glass: rgba(15, 18, 35, 0.6);
+      --glass-border: rgba(255, 255, 255, 0.06);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Outfit', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    .container { width: 100%; max-width: 1160px; margin: 0 auto; padding: 0 1.25rem; }
+    @media (min-width: 768px) { .container { padding: 0 2rem; } }
+
+    /* Futuristic background – layered depth + motion */
+    .mesh-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background: radial-gradient(ellipse 120% 100% at 50% 0%, #0a0a12 0%, #050508 40%, #030306 100%);
+      overflow: hidden;
+    }
+    /* Animated gradient orbs */
+    .mesh-bg .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      animation: orbFloat 20s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .mesh-bg .orb-1 {
+      width: 60vmin;
+      height: 60vmin;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, transparent 70%);
+      top: -20%;
+      left: -10%;
+      animation-delay: 0s;
+      animation-duration: 25s;
+    }
+    .mesh-bg .orb-2 {
+      width: 50vmin;
+      height: 50vmin;
+      background: radial-gradient(circle, rgba(34, 211, 238, 0.25) 0%, transparent 70%);
+      top: 40%;
+      right: -15%;
+      animation-delay: -7s;
+      animation-duration: 22s;
+    }
+    .mesh-bg .orb-3 {
+      width: 40vmin;
+      height: 40vmin;
+      background: radial-gradient(circle, rgba(167, 139, 250, 0.2) 0%, transparent 70%);
+      bottom: -10%;
+      left: 30%;
+      animation-delay: -14s;
+      animation-duration: 28s;
+    }
+    @keyframes orbFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(3%, -4%) scale(1.05); }
+      66% { transform: translate(-2%, 2%) scale(0.98); }
+    }
+    /* Perspective grid – fine lines */
+    .mesh-bg::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(34, 211, 238, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(34, 211, 238, 0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 15%, transparent 65%);
+      -webkit-mask-image: radial-gradient(ellipse 100% 80% at 50% 20%, black 15%, transparent 65%);
+      animation: gridPulse 8s ease-in-out infinite;
+    }
+    @keyframes gridPulse {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 1; }
+    }
+    /* Secondary grid – larger, softer */
+    .mesh-bg .grid-overlay {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(99, 179, 237, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99, 179, 237, 0.02) 1px, transparent 1px);
+      background-size: 120px 120px;
+      mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 10%, transparent 55%);
+      -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 10%, transparent 55%);
+      pointer-events: none;
+    }
+    /* Glow layers */
+    .mesh-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 90% 70% at 50% -15%, rgba(99, 102, 241, 0.2) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 50% at 85% 50%, rgba(34, 211, 238, 0.12) 0%, transparent 45%),
+        radial-gradient(ellipse 40% 40% at 15% 80%, rgba(167, 139, 250, 0.1) 0%, transparent 45%);
+      pointer-events: none;
+    }
+    /* Subtle scan line (hero area) */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.15), transparent);
+      opacity: 0.6;
+      animation: scanLine 4s ease-in-out infinite;
+    }
+    @keyframes scanLine {
+      0%, 100% { opacity: 0.3; transform: translateY(0); }
+      50% { opacity: 0.7; transform: translateY(20px); }
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 5rem 0 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero .container {
+      position: relative;
+      z-index: 1;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+      border-left: 1px solid rgba(34, 211, 238, 0.25);
+    }
+    @media (min-width: 768px) {
+      .hero .container {
+        padding-left: 2rem;
+        border-left-width: 2px;
+        box-shadow: -12px 0 32px rgba(34, 211, 238, 0.08);
+      }
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.9rem;
+      background: var(--glass);
+      border: 1px solid var(--border-glow);
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--accent-cyan);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+      animation: fadeUp 0.6s ease-out;
+    }
+    .hero-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      box-shadow: 0 0 10px var(--accent-green);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .hero h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.25rem, 6vw, 4rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+      animation: fadeUp 0.6s ease-out 0.1s both;
+    }
+    .hero h1 .gradient-text {
+      background: linear-gradient(135deg, #f0f2f8 0%, var(--accent-cyan) 50%, var(--accent-purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero .subtitle {
+      font-size: clamp(1.15rem, 2.5vw, 1.5rem);
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      font-weight: 400;
+      animation: fadeUp 0.6s ease-out 0.2s both;
+    }
+    .hero p {
+      color: var(--text-muted);
+      max-width: 520px;
+      margin-bottom: 2rem;
+      font-size: 1.05rem;
+      animation: fadeUp 0.6s ease-out 0.25s both;
+    }
+    .hero .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 1rem 1.75rem;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid), var(--gradient-end));
+      background-size: 200% 200%;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.15);
+      box-shadow: 0 4px 24px rgba(99, 102, 241, 0.35);
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: fadeUp 0.6s ease-out 0.35s both;
+    }
+    .hero .cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(99, 102, 241, 0.45);
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Sections */
+    section {
+      padding: 5rem 0;
+      position: relative;
+    }
+    section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 600px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-glow), transparent);
+      opacity: 0.6;
+    }
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+      margin-bottom: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section-label::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      background: var(--accent-cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 12px var(--accent-cyan);
+      animation: labelPulse 2s ease-in-out infinite;
+    }
+    @keyframes labelPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(1.1); }
+    }
+    section h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+    section p, section ul { color: var(--text-muted); max-width: 640px; }
+
+    /* Why Fintdex */
+    .pain-points {
+      list-style: none;
+      margin: 1.5rem 0;
+      display: grid;
+      gap: 0.5rem;
+    }
+    .pain-points li {
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      position: relative;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      font-size: 0.95rem;
+    }
+    .pain-points li::before {
+      content: '◆';
+      position: absolute;
+      left: 1rem;
+      color: var(--accent-cyan);
+      font-size: 0.5rem;
+      top: 1rem;
+    }
+    .solve-line {
+      margin-top: 1.75rem;
+      font-weight: 600;
+      color: var(--text);
+      font-size: 1.05rem;
+      padding: 1rem 1.25rem 1rem 2.5rem;
+      background: linear-gradient(135deg, rgba(99, 179, 237, 0.08), rgba(167, 139, 250, 0.08));
+      border: 1px solid var(--border-glow);
+      border-radius: 12px;
+      position: relative;
+    }
+    .solve-line::before {
+      content: '→';
+      position: absolute;
+      left: 1rem;
+      color: var(--accent-green);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    /* Get Ready – MetaMask & Buy USDT */
+    .get-ready-section .section-intro { max-width: 640px; margin-bottom: 2rem; }
+    .get-ready-grid {
+      display: grid;
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    @media (min-width: 768px) { .get-ready-grid { grid-template-columns: repeat(2, 1fr); } }
+    .get-ready-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .get-ready-card:hover {
+      border-color: var(--border-glow);
+      box-shadow: var(--glow-cyan);
+    }
+    .get-ready-card .card-head {
+      padding: 1.5rem 1.5rem 0;
+    }
+    .get-ready-card .card-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+    .get-ready-card .card-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+    .get-ready-steps {
+      list-style: none;
+      padding: 0 1.5rem 1rem;
+      margin: 0;
+    }
+    .get-ready-steps li {
+      padding: 0.5rem 0 0.5rem 1.75rem;
+      position: relative;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .get-ready-steps li::before {
+      content: attr(data-step);
+      position: absolute;
+      left: 0;
+      width: 1.25rem;
+      height: 1.25rem;
+      line-height: 1.25rem;
+      text-align: center;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fff;
+      top: 0.5rem;
+    }
+    .get-ready-steps a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+    }
+    .get-ready-steps a:hover { text-decoration: underline; }
+    .get-ready-card .embed-wrap {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: var(--surface-solid);
+    }
+    .get-ready-card .embed-wrap iframe,
+    .get-ready-card .embed-wrap video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    .get-ready-card .embed-wrap video {
+      object-fit: contain;
+      display: block;
+    }
+    .get-ready-card .embed-label {
+      padding: 0.5rem 1.5rem 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* How it works – steps */
+    .steps {
+      display: grid;
+      gap: 1.25rem;
+      margin-top: 2.5rem;
+    }
+    @media (min-width: 640px) { .steps { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 900px) { .steps { grid-template-columns: repeat(5, 1fr); } }
+    .step {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      padding: 1.75rem;
+      position: relative;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      overflow: hidden;
+    }
+    .step::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      padding: 1px;
+      background: linear-gradient(135deg, transparent, rgba(34, 211, 238, 0.2), transparent 50%, rgba(167, 139, 250, 0.15), transparent);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .step:hover {
+      border-color: var(--border-glow);
+      box-shadow: var(--glow-cyan);
+    }
+    .step:hover::before { opacity: 1; }
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+    }
+    .step h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; margin-bottom: 0.4rem; font-weight: 600; }
+    .step p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; }
+
+    /* Video grid */
+    .video-grid {
+      display: grid;
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+    @media (min-width: 640px) { .video-grid { grid-template-columns: repeat(2, 1fr); } }
+    .video-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+      position: relative;
+    }
+    .video-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.06), transparent);
+      transition: left 0.5s ease;
+      pointer-events: none;
+    }
+    .video-card:hover {
+      border-color: var(--border-glow);
+      box-shadow: var(--glow-cyan);
+      transform: translateY(-2px);
+    }
+    .video-card:hover::after { left: 100%; }
+    .video-card .media-wrap {
+      aspect-ratio: 16/9;
+      background: var(--surface-solid);
+      overflow: hidden;
+      position: relative;
+    }
+    .video-card .media-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      pointer-events: none;
+    }
+    .video-card .media-wrap video,
+    .video-card .media-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .video-card .card-pill {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      z-index: 2;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      border-radius: 6px;
+      background: rgba(34, 211, 238, 0.2);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(34, 211, 238, 0.3);
+    }
+    .video-card .card-pill.ai { background: rgba(167, 139, 250, 0.2); color: var(--accent-purple); border-color: rgba(167, 139, 250, 0.3); }
+    .video-card .title { padding: 1.1rem 1.25rem 0; font-weight: 600; font-size: 1.05rem; font-family: 'Space Grotesk', sans-serif; }
+    .video-card .desc { padding: 0.5rem 1.25rem 1.25rem; font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; }
+    .video-card .media-wrap { position: relative; }
+
+    /* Knowledge Series – YouTube education */
+    .knowledge-section p.section-intro { max-width: 640px; margin-bottom: 0; }
+    .knowledge-grid {
+      display: grid;
+      gap: 1.75rem;
+      margin-top: 2.5rem;
+    }
+    @media (min-width: 640px) { .knowledge-grid { grid-template-columns: repeat(2, 1fr); } }
+    .knowledge-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+      position: relative;
+    }
+    .knowledge-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 80px;
+      height: 80px;
+      background: radial-gradient(circle at top right, rgba(34, 211, 238, 0.15), transparent 70%);
+      pointer-events: none;
+      border-radius: 0 16px 0 0;
+    }
+    .knowledge-card:hover {
+      border-color: var(--border-glow);
+      box-shadow: var(--glow-cyan);
+      transform: translateY(-2px);
+    }
+    .knowledge-card .embed-wrap {
+      position: relative;
+      aspect-ratio: 16/9;
+      background: var(--surface-solid);
+    }
+    .knowledge-card .embed-wrap iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+    .knowledge-card .card-body { padding: 1.25rem 1.5rem; }
+    .knowledge-card .card-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+      line-height: 1.35;
+    }
+    .knowledge-card .card-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-bottom: 0.75rem;
+    }
+    .knowledge-card .watch-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--accent-cyan);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .knowledge-card .watch-link:hover { color: #67e8f9; }
+    .knowledge-card .watch-link::after { content: ' →'; }
+
+    /* Trust, Who */
+    .trust-grid, .who-grid {
+      display: grid;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    @media (min-width: 600px) { .trust-grid { grid-template-columns: repeat(2, 1fr); } .who-grid { grid-template-columns: repeat(2, 1fr); } }
+    .trust-item, .who-item {
+      padding: 1.25rem 1.25rem 1.25rem 3rem;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      position: relative;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .trust-item:hover, .who-item:hover {
+      border-color: var(--border-glow);
+      box-shadow: var(--glow-cyan);
+    }
+    .trust-item::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, var(--accent-cyan), var(--accent-green));
+      border-radius: 12px 0 0 12px;
+    }
+    .who-item::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, var(--accent-purple), var(--accent-cyan));
+      border-radius: 12px 0 0 12px;
+    }
+    .trust-item::before, .who-item::before {
+      content: '✓';
+      position: absolute;
+      left: 1.25rem;
+      top: 1.25rem;
+      color: var(--accent-green);
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-shadow: 0 0 12px rgba(52, 211, 153, 0.4);
+      z-index: 1;
+    }
+
+    .cta-section {
+      text-align: center;
+      padding: 5rem 0;
+      position: relative;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(99, 102, 241, 0.12), transparent 60%);
+      pointer-events: none;
+    }
+    .cta-section .container { position: relative; z-index: 1; }
+    .cta-section h2 { margin-bottom: 0.5rem; }
+    .cta-section p { margin: 0 auto 2rem; max-width: 480px; }
+    .cta-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+    .cta-buttons a {
+      display: inline-flex;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .cta-buttons a:hover { transform: translateY(-2px); }
+    .cta-primary {
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid), var(--gradient-end));
+      background-size: 200% 200%;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 4px 24px rgba(99, 102, 241, 0.4);
+      animation: ctaGlow 6s ease-in-out infinite;
+    }
+    .cta-primary:hover { box-shadow: 0 8px 32px rgba(99, 102, 241, 0.5); animation: none; }
+    @keyframes ctaGlow {
+      0%, 100% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+    }
+    .cta-secondary {
+      background: var(--glass);
+      border: 1px solid var(--border-glow);
+      color: var(--text);
+    }
+    .cta-secondary:hover { box-shadow: var(--glow-cyan); }
+
+    /* Footer */
+    footer {
+      padding: 3rem 0;
+      position: relative;
+      border-top: 1px solid var(--glass-border);
+    }
+    footer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+      opacity: 0.8;
+    }
+    footer .brand {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin-bottom: 0.35rem;
+      background: linear-gradient(135deg, var(--text), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    footer p { font-size: 0.9rem; color: var(--text-muted); }
+    footer a { color: var(--accent-cyan); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="mesh-bg" aria-hidden="true">
+    <div class="orb orb-1" aria-hidden="true"></div>
+    <div class="orb orb-2" aria-hidden="true"></div>
+    <div class="orb orb-3" aria-hidden="true"></div>
+    <div class="grid-overlay" aria-hidden="true"></div>
+  </div>
+  <header class="hero">
+    <div class="container">
+      <div class="hero-badge">AI-Powered · Next-Gen Escrow</div>
+      <h1><span class="gradient-text">Fintdex</span> – Secure Escrow for Global Trade</h1>
+      <p class="subtitle">Protect your payments. Build trust. Trade with confidence.</p>
+      <p>Technology-enabled escrow for exporters and importers. Funds are held securely until shipment and documents are verified, so both parties can trade with confidence.</p>
+      <a href="#how-it-works" class="cta">See how it works</a>
+    </div>
+  </header>
+
+  <section id="why">
+    <div class="container">
+      <div class="section-label">The problem</div>
+      <h2>Why Fintdex</h2>
+      <p>Exporters and importers face real risks every day:</p>
+      <ul class="pain-points">
+        <li>Advance payment fraud</li>
+        <li>Trust issues with new buyers</li>
+        <li>Expensive Letters of Credit</li>
+        <li>Payment delays and disputes</li>
+        <li>Document and shipment disputes</li>
+      </ul>
+      <p class="solve-line">Fintdex addresses these risks with secure escrow: funds are held in custody until agreed conditions are met.</p>
+    </div>
+  </section>
+
+  <section id="get-ready" class="get-ready-section">
+    <div class="container">
+      <div class="section-label">Before you start</div>
+      <h2>Get Ready to Trade</h2>
+      <p class="section-intro">You need a crypto wallet and USDT or USDC on Polygon to create an escrow. Follow these two steps—and watch the short videos—so you’re ready to use Fintdex.</p>
+      <div class="get-ready-grid">
+        <div class="get-ready-card">
+          <div class="card-head">
+            <h3 class="card-title">1. Install MetaMask</h3>
+            <p class="card-desc">MetaMask is the wallet you’ll connect to Fintdex. It holds your funds and lets you sign transactions securely. On desktop use the browser extension; on mobile, download the app.</p>
+          </div>
+          <ol class="get-ready-steps" role="list">
+            <li data-step="1"><strong>Desktop:</strong> Download the MetaMask extension for Chrome, Firefox, Brave, or Edge from <a href="https://metamask.io/download/" target="_blank" rel="noopener noreferrer">metamask.io/download</a>. <strong>Mobile:</strong> Install the MetaMask app from the <a href="https://apps.apple.com/app/metamask/id1434434200" target="_blank" rel="noopener noreferrer">App Store (iOS)</a> or <a href="https://play.google.com/store/apps/details?id=io.metamask" target="_blank" rel="noopener noreferrer">Play Store (Android)</a>.</li>
+            <li data-step="2">Open MetaMask and choose “Create a wallet.” Follow the setup steps.</li>
+            <li data-step="3"><strong>Store your 12-word recovery phrase very safely.</strong> Write it down on paper and keep it in a secure place. Never store it in email, cloud, or screenshots. Anyone with these 12 words can access your wallet and funds—never share them with anyone, including “support” or strangers.</li>
+            <li data-step="4">When you use Fintdex, connect your wallet and switch to <strong>Polygon Mainnet</strong> when prompted (Fintdex runs on Polygon).</li>
+          </ol>
+          <div class="embed-wrap">
+            <video src="assets/video-1-connect-escrow.mp4" controls playsinline preload="metadata" title="How to install MetaMask"></video>
+          </div>
+          <p class="embed-label">Watch the video above, then download from <a href="https://metamask.io/download/" target="_blank" rel="noopener noreferrer">metamask.io/download</a>, <a href="https://apps.apple.com/app/metamask/id1434434200" target="_blank" rel="noopener noreferrer">App Store</a>, or <a href="https://play.google.com/store/apps/details?id=io.metamask" target="_blank" rel="noopener noreferrer">Play Store</a>.</p>
+        </div>
+        <div class="get-ready-card">
+          <div class="card-head">
+            <h3 class="card-title">2. Get USDT or USDC on Polygon</h3>
+            <p class="card-desc">Escrow on Fintdex uses stablecoins (USDT or USDC) on the Polygon network. You need to buy or receive them before creating an escrow.</p>
+          </div>
+          <ol class="get-ready-steps" role="list">
+            <li data-step="1">Make sure MetaMask is set to <strong>Polygon Mainnet</strong> (not Ethereum). Fintdex will prompt you to switch if needed.</li>
+            <li data-step="2">Buy USDT or USDC: when you create an escrow on Fintdex, if your balance is low, the app shows a “Buy stablecoins” option that opens providers like <strong>MoonPay</strong>, <strong>Ramp</strong>, or <strong>Onramp.money</strong> (for India).</li>
+            <li data-step="3">Complete the purchase with your card or bank; the tokens are sent to your MetaMask wallet on Polygon.</li>
+            <li data-step="4">Return to <a href="https://www.fintdex.com/create" target="_blank" rel="noopener noreferrer">Fintdex Create Escrow</a> and continue—your balance will update automatically.</li>
+          </ol>
+          <div class="embed-wrap">
+            <iframe src="https://www.youtube-nocookie.com/embed/bCAqqAvNPJs" title="How to get USDT or USDC in MetaMask" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+          </div>
+          <p class="embed-label">Watch: How to get USDT or USDC in MetaMask. On Fintdex, use the in-app “Buy stablecoins” button to buy on Polygon.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how-it-works">
+    <div class="container">
+      <div class="section-label">The flow</div>
+      <h2>How Fintdex Works</h2>
+      <p>Five simple steps from agreement to release.</p>
+      <div class="steps">
+        <div class="step">
+          <span class="step-num">1</span>
+          <h3>Agree on terms</h3>
+          <p>Buyer and seller agree on trade terms and documents.</p>
+        </div>
+        <div class="step">
+          <span class="step-num">2</span>
+          <h3>Funds in escrow</h3>
+          <p>Buyer deposits funds into secure escrow.</p>
+        </div>
+        <div class="step">
+          <span class="step-num">3</span>
+          <h3>Ship & upload</h3>
+          <p>Seller ships goods and uploads documents.</p>
+        </div>
+        <div class="step">
+          <span class="step-num">4</span>
+          <h3>Verify</h3>
+          <p>Buyer verifies shipment and documents.</p>
+        </div>
+        <div class="step">
+          <span class="step-num">5</span>
+          <h3>Release</h3>
+          <p>Funds are released securely to the seller.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="videos">
+    <div class="container">
+      <div class="section-label">Product · Demos & guides</div>
+      <h2>Learn How to Use Fintdex</h2>
+      <p>Follow the full flow from connecting your wallet to fund release. Each step is shown so buyers, sellers, and verifiers know exactly what to expect.</p>
+      <div class="video-grid">
+        <div class="video-card">
+          <div class="media-wrap">
+            <span class="card-pill">Demo</span>
+            <video src="assets/video-1-connect-escrow.mp4" controls playsinline preload="metadata" title="Connect wallet and create escrow"></video>
+          </div>
+          <div class="title">1. The App: Connect Your Wallet & Create Escrow</div>
+          <div class="desc">See how the Fintdex app works: connect your wallet at the top, then create a new escrow in a few simple steps.</div>
+        </div>
+        <div class="video-card">
+          <div class="media-wrap">
+            <span class="card-pill ai">AI</span>
+            <video src="assets/video-2-ai-deal-assistant.mp4" controls playsinline preload="metadata" title="AI Trade Deal Assistant"></video>
+          </div>
+          <div class="title">2. AI Trade Deal Assistant</div>
+          <div class="desc">Our AI feature helps importers and exporters set up escrow safely and easily—no technical knowledge required. The AI Trade Deal Assistant guides you through the process step by step.</div>
+        </div>
+        <div class="video-card">
+          <div class="media-wrap">
+            <span class="card-pill">Demo</span>
+            <video src="assets/video-3-buyer-fills-escrow.mp4" controls playsinline preload="metadata" title="Buyer fills escrow"></video>
+          </div>
+          <div class="title">3. Buyer: Complete the Escrow Details</div>
+          <div class="desc">As the buyer, you fill in the escrow with the amount, terms, and required documents. This demo shows exactly how.</div>
+        </div>
+        <div class="video-card">
+          <div class="media-wrap">
+            <span class="card-pill">Demo</span>
+            <video src="assets/video-4-seller-view-submit-docs.mp4" controls playsinline preload="metadata" title="Seller view escrow and submit documents"></video>
+          </div>
+          <div class="title">4. Seller: View Escrow & Submit Documents</div>
+          <div class="desc">Sellers go to Fintdex.com to view the escrow created by the buyer—locked amount, shipment timeline, and all details. They then submit documents that are stored on IPFS so the buyer and verifiers can access them.</div>
+        </div>
+        <div class="video-card">
+          <div class="media-wrap">
+            <span class="card-pill">Verification</span>
+            <img src="assets/doc-verification.png" alt="Fintdex Admin Dashboard – document verification" loading="lazy" />
+          </div>
+          <div class="title">5. Document Verification by Fintdex Verifiers</div>
+          <div class="desc">After the seller submits all documents, Fintdex Verifiers check that everything is genuine. Buyers can view the same documents; if they have concerns, they can raise a dispute. When satisfied, verifiers approve the documents and the process moves toward fund release.</div>
+        </div>
+        <div class="video-card">
+          <div class="media-wrap">
+            <span class="card-pill">Demo</span>
+            <video src="assets/video-6-verifiers-release-funds.mp4" controls playsinline preload="metadata" title="Verifiers release funds"></video>
+          </div>
+          <div class="title">6. Verifiers Release Funds</div>
+          <div class="desc">Once the seller marks the goods as shipped, Fintdex Verifiers release the funds to the seller. The seller receives payment and the buyer receives the goods with verified documents.</div>
+        </div>
+        <div class="video-card">
+          <div class="media-wrap">
+            <span class="card-pill">Dashboard</span>
+            <img src="assets/fund-release-dashboard.png" alt="Fintdex BOL Verification Dashboard – ready for fund release" loading="lazy" />
+          </div>
+          <div class="title">Ready for Fund Release</div>
+          <div class="desc">When the Bill of Lading is verified against shipping line databases and goods are confirmed shipped, the escrow is marked ready and funds can be released to the seller.</div>
+        </div>
+        <div class="video-card">
+          <div class="media-wrap">
+            <span class="card-pill">Complete</span>
+            <img src="assets/escrow-completed.png" alt="Escrow completed – funds released to wallet" loading="lazy" />
+          </div>
+          <div class="title">Escrow Completed – Funds in Your Wallet</div>
+          <div class="desc">Transaction complete: funds are released to your wallet. Convert to INR, AED, or any local currency using a licensed off-ramp or exchange.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="knowledge-series" class="knowledge-section">
+    <div class="container">
+      <div class="section-label">Education</div>
+      <h2>Knowledge Series: DApps & Global Trade</h2>
+      <p class="section-intro">Short educational videos on how digital infrastructure, smart contracts, and modern documentation are changing international trade. Essential viewing for exporters and importers exploring technology-enabled escrow and settlements.</p>
+      <div class="knowledge-grid">
+        <article class="knowledge-card">
+          <div class="embed-wrap">
+            <iframe src="https://www.youtube-nocookie.com/embed/2Yrva29eMkA" title="Blockchain Revolution in International Business" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title">Blockchain Revolution in International Business</h3>
+            <p class="card-desc">How modern digital infrastructure is reshaping risk management, settlements, and documentation.</p>
+            <a href="https://youtu.be/2Yrva29eMkA" class="watch-link" target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
+          </div>
+        </article>
+        <article class="knowledge-card">
+          <div class="embed-wrap">
+            <iframe src="https://www.youtube-nocookie.com/embed/qzSasH0CFpM" title="Practical Application of Cryptocurrency in Export Import Trade" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title">Practical Application of Cryptocurrency in Export–Import Trade</h3>
+            <p class="card-desc">Case-study style discussion on how digital payment rails can be layered into real trade flows.</p>
+            <a href="https://youtu.be/qzSasH0CFpM" class="watch-link" target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
+          </div>
+        </article>
+        <article class="knowledge-card">
+          <div class="embed-wrap">
+            <iframe src="https://www.youtube-nocookie.com/embed/EzaHuuJ0bok" title="How Exporters Can Become More Competitive Using Smart Contracts" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title">How Exporters Can Become More Competitive Using Smart Contracts</h3>
+            <p class="card-desc">Exploring how technology-enabled contracts can improve pricing, speed, and trust in export deals.</p>
+            <a href="https://youtu.be/EzaHuuJ0bok" class="watch-link" target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
+          </div>
+        </article>
+        <article class="knowledge-card">
+          <div class="embed-wrap">
+            <iframe src="https://www.youtube-nocookie.com/embed/UjWL1BgOxJ8" title="Export–Import Simplified: Electronic Bill of Lading (e-BL)" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+          </div>
+          <div class="card-body">
+            <h3 class="card-title">Export–Import Simplified: Electronic Bill of Lading (e-BL)</h3>
+            <p class="card-desc">Overview of electronic documentation for shipments and how it can simplify trade flows.</p>
+            <a href="https://youtu.be/UjWL1BgOxJ8" class="watch-link" target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section-label">Security</div>
+      <h2>Trust & Safety</h2>
+      <p>Built for transparency and control.</p>
+      <div class="trust-grid">
+        <div class="trust-item">Funds are held securely until agreed conditions are met.</div>
+        <div class="trust-item">Protects both buyers and sellers.</div>
+        <div class="trust-item">Reduces fraud and payment risk.</div>
+        <div class="trust-item">Transparent, step-by-step process.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="container">
+      <div class="section-label">For you</div>
+      <h2>Who Should Use Fintdex</h2>
+      <p>Designed for real trade flows.</p>
+      <div class="who-grid">
+        <div class="who-item">First-time exporters</div>
+        <div class="who-item">New buyer relationships</div>
+        <div class="who-item">High-risk markets</div>
+        <div class="who-item">Small and medium exporters</div>
+        <div class="who-item">Importers seeking payment security</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="container">
+      <h2>Start Trading with Confidence</h2>
+      <p>Create a secure escrow or speak with our team.</p>
+      <div class="cta-buttons">
+        <a href="https://www.fintdex.com/create" class="cta-primary" target="_blank" rel="noopener noreferrer">Start Escrow</a>
+        <a href="https://wa.me/916363605561" class="cta-secondary" target="_blank" rel="noopener noreferrer">Contact on WhatsApp</a>
+        <a href="mailto:admin@fintdex.com" class="cta-secondary">Email Us</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="brand">Fintdex</div>
+      <p>Technology-enabled trade protection for exporters and importers.</p>
+      <p><a href="mailto:admin@fintdex.com">admin@fintdex.com</a> · WhatsApp <a href="https://wa.me/916363605561" target="_blank" rel="noopener noreferrer">+91 6363605561</a></p>
+    </div>
+  </footer>
+</body>
+</html>
